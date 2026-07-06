@@ -15,6 +15,7 @@ function App() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   // Save search
   useEffect(() => {
@@ -37,7 +38,6 @@ function App() {
       );
 
       const data = await res.json();
-
       setRecipes(data.meals || []);
     } catch (err) {
       console.error(err);
@@ -99,9 +99,7 @@ function App() {
         {!loading && recipes.length > 0 && (
           <>
             <div className="flex items-center justify-between mt-12 mb-6">
-              <h2 className="text-3xl font-bold text-gray-800">
-                Recipes
-              </h2>
+              <h2 className="text-3xl font-bold text-gray-800">Recipes</h2>
 
               <span className="bg-orange-100 text-orange-700 px-4 py-2 rounded-full font-semibold">
                 {recipes.length} Results
@@ -112,7 +110,8 @@ function App() {
               {recipes.map((recipe) => (
                 <div
                   key={recipe.idMeal}
-                  className="transition duration-300 hover:-translate-y-2 hover:scale-[1.02]"
+                  onClick={() => setSelectedRecipe(recipe)}
+                  className="cursor-pointer transition duration-300 hover:-translate-y-2 hover:scale-[1.02]"
                 >
                   <RecipeCard recipe={recipe} />
                 </div>
@@ -121,6 +120,61 @@ function App() {
           </>
         )}
       </div>
+
+      {/* Recipe Details Modal */}
+      {selectedRecipe && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl">
+            <button
+              onClick={() => setSelectedRecipe(null)}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-red-500 text-white hover:bg-red-600 text-lg"
+            >
+              ✕
+            </button>
+
+            <img
+              src={selectedRecipe.strMealThumb}
+              alt={selectedRecipe.strMeal}
+              className="w-full h-72 object-cover rounded-t-2xl"
+            />
+
+            <div className="p-6">
+              <h2 className="text-3xl font-bold text-gray-800">
+                {selectedRecipe.strMeal}
+              </h2>
+
+              <div className="flex flex-wrap gap-3 mt-4">
+                <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full">
+                  🍴 {selectedRecipe.strCategory}
+                </span>
+
+                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                  🌍 {selectedRecipe.strArea}
+                </span>
+              </div>
+
+              <h3 className="text-xl font-semibold mt-6 mb-3">
+                Instructions
+              </h3>
+
+              <p className="text-gray-600 leading-7 whitespace-pre-line">
+                {selectedRecipe.strInstructions}
+              </p>
+
+              {selectedRecipe.strYoutube && (
+                <a
+                  href={selectedRecipe.strYoutube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-6 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold"
+                >
+                  ▶ Watch on YouTube
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
